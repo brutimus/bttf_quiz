@@ -1,0 +1,215 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,800' rel='stylesheet' type='text/css'>
+        <style>
+            #quiz-container {
+                position: relative;
+                max-width: 400px;
+                height: 300px;
+                overflow: hidden;
+                font-family: 'Source Sans Pro';
+            }
+            #quiz-question-template {
+                display: none;
+            }
+            .quiz-question {
+                position: absolute;
+                top: 0;
+                left: 0%;
+                width: 100%;
+                height: 300px;
+                background-color: white;
+                -webkit-transition: 300ms;
+                box-sizing: border-box;
+                padding: 10px;
+            }
+            .quiz-question.done {
+                left: -120%;
+            }
+            .quiz-question .fg {
+                position: relative;
+                background-color: rgba(0,0,0,.5);
+                color: white;
+                padding: 10px;
+            }
+            .quiz-question img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                max-width: 100%;
+            }
+            .quiz-question p {
+                position: relative;
+                z-index: 5;
+            }
+            .quiz-answers {
+                position: relative;
+                z-index: 5;
+            }
+            .quiz-answers .answer {
+                cursor: pointer;
+            }
+            #quiz-container .results {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 100;
+            }
+            #quiz-container .results img {
+                max-width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="quiz-container">
+            <div id="quiz-question-template" class="quiz-question">
+                <img src="https://placeholdit.imgix.net/~text?w=400&h=300" alt="">
+                <div class="fg">
+                    <p class="quiz-text"></p>
+                    <ul class="quiz-answers"></ul>
+                    </div>
+            </div>
+            <div class="quiz-question-list"></div>
+            <div class="results">
+                <img src="" alt="">
+                <p></p>
+            </div>
+        </div>
+
+        <!-- <script src="js/min/main-min.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                var characters = [
+                    [[8, 14], 'marty', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/Hologram_25.bttf.1021.jpg'],
+                    [[15, 21], 'doc', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/19891120_mat_g90_480.JPG'],
+                    [[22, 27], 'lorraine', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/19851231_zaf_i90_001.JPG'],
+                    [[28, 34], 'george', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/Back-to-the-Future-back-to-the-future-8227843-640-480.JPG'],
+                    [[35, 40], 'biff', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/back-to-the-future-biff-marty-cafe.JPG']],
+                    questions = [
+                        {
+                            q: "If you could build a time machine, what vehicle would you make it out of?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/delorean.jpg",
+                            a_list: [
+                                ['Skateboard', 1],
+                                ['Delorean', 2],
+                                ['Minivan', 3],
+                                ['Prius', 4],
+                                ['Muscle car', 5]]
+                        },{
+                            q: "You find a hoverboard, what do you do?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/19891120_mat_g90_474.JPG",
+                            a_list: [
+                                ["Ride it", 1],
+                                ["You run away from it", 4],
+                                ["Fall in love with it", 3],
+                                ["Take it apart", 2],
+                                ["You crash into a manure truck while riding it", 5]]
+                        },{
+                            q: "What kind of clock do you prefer?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/wfkyT.JPG",
+                            a_list: [
+                                ["Apple watch", 2],
+                                ["Clock you in the face", 5],
+                                ["Grandfather clock", 3],
+                                ["Pocket watch", 4],
+                                ["Digital", 1]]
+                        },{
+                            q: "If you traveled back or forward through time, what would you want to see?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/19850101_alb_a90_294816.JPG",
+                            a_list: [
+                                ["Forward to visit Mars", 4],
+                                ["Back to see cavemen", 5],
+                                ["Back to see Jimi Hendrix", 1],
+                                ["Back to see the discovery of electricity", 2],
+                                ["Forward to see if your jailbird uncle got out of prison", 3]]
+                        },{
+                            q: "Whose death would you use a time machine to try to prevent?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/19891120_mat_g90_477.JPG",
+                            a_list: [
+                                ["My dad", 1],
+                                ["Albert Einstein", 2],
+                                ["My mom", 3],
+                                ["Ray Bradbury", 4],
+                                ["Al Capone", 5]]
+                        },{
+                            q: "If you could take one drink with you on your time travels, what would it be?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/marty-mcfly-pepsi-perfect.JPG",
+                            a_list: [
+                                ["Coffee", 2],
+                                ["Brandy", 3],
+                                ["Pepsi", 1],
+                                ["Spiked punch", 5],
+                                ["Chocolate milk", 4]]
+                        },{
+                            q: "If you could give a musician 'that sound you're looking for', who would it be?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/presley.p1127_1_1_2NFK5C1.JPG",
+                            a_list: [
+                                ["Huey Lewis and the News", 1],
+                                ["Bing Crosby", 2],
+                                ["Chuck Berry", 3],
+                                ["The Four Seasons", 4],
+                                ["Elvis", 5]]
+                        },{
+                            q: "If someone called you chicken, how would you respond?",
+                            image: "http://files.onset.freedom.com/ocregister/Back_to_the_future/biff.JPG",
+                            a_list: [
+                                ["Nobody calls me chicken", 1],
+                                ["Mmmm, chicken", 3],
+                                ["I'm a vegetarian", 4],
+                                ["Sticks and stones will break my bones, but names will never hurt me", 2],
+                                ["Shut up, McFly", 5]]
+                        }
+                    ],
+                    qTemplate = $('#quiz-question-template'),
+                    qList = $('.quiz-question-list'),
+                    qResults = $('#quiz-container .results'),
+                    qIndex = 0,
+                    qLength = questions.length,
+                    qSum = 0;
+
+                $.each(questions, function(index, val) {
+                    var q = qTemplate.clone()
+                        .attr('id', '').css('z-index', index),
+                        a_list_dom = q.find('.quiz-answers');
+                    q.find('img').attr('src', val.image);
+                    q.find('.quiz-text').text(val.q)
+                    $.each(val.a_list, function(index2, val2) {
+                        $('<li>')
+                            .addClass('answer')
+                            .text(val2[0])
+                            .attr('value', val2[1])
+                            .click(function(event) {
+                                qSum += $(this).val();
+                                qIndex++;
+                                if (qIndex === qLength) {
+                                    var winner;
+                                    $.each(characters, function(index, val) {
+                                        if ((val[0][0] <= qSum && val[0][1] >= qSum)) {
+                                            winner = val;
+                                        };
+                                    });
+                                    qResults.find('img').attr('src', winner[2]);
+                                };
+                                $(this).parent().parent().parent().addClass('done');
+                                console.log(qSum)
+                            })
+                            .appendTo(a_list_dom);
+                    });
+                    q.appendTo(qList);
+                });
+
+
+            });
+        </script>
+    </body>
+</html>
