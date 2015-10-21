@@ -28,16 +28,19 @@
                 background-color: white;
                 -webkit-transition: 300ms;
                 box-sizing: border-box;
-                padding: 10px;
+                /*padding: 10px;*/
             }
             .quiz-question.done {
                 left: -120%;
             }
             .quiz-question .fg {
                 position: relative;
-                background-color: rgba(0,0,0,.5);
+                background-color: rgba(0,0,0,.7);
                 color: white;
                 padding: 10px;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
             }
             .quiz-question img {
                 position: absolute;
@@ -49,6 +52,7 @@
             .quiz-question p {
                 position: relative;
                 z-index: 5;
+                font-weight: 600;
             }
             .quiz-answers {
                 position: relative;
@@ -56,6 +60,8 @@
             }
             .quiz-answers .answer {
                 cursor: pointer;
+                font-size: .9em;
+                padding: 3px 0;
             }
             #quiz-container .results {
                 position: absolute;
@@ -81,7 +87,14 @@
             <div class="quiz-question-list"></div>
             <div class="results">
                 <img src="" alt="">
-                <p></p>
+                <div id="quiz-sharing">
+                    <a class="fb" href="">
+                        <i class="icon-facebook"></i>
+                    </a>
+                    <a class="twitter" href="" onclick="window.open(this.href, 'twitter_share', 'height=320, width=640, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, directories=no, status=no');return false;">
+                        <i class="icon-twitter"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -89,12 +102,41 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script>
             $(document).ready(function() {
+                String.prototype.format = function() {
+                    var args = arguments;
+                    return this.replace(/{(\d+)}/g, function(match, number) { 
+                      return typeof args[number] != 'undefined'
+                        ? args[number]
+                        : match
+                      ;
+                    });
+                };
                 var characters = [
-                    [[8, 14], 'marty', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/Hologram_25.bttf.1021.jpg'],
-                    [[15, 21], 'doc', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/19891120_mat_g90_480.JPG'],
-                    [[22, 27], 'lorraine', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/19851231_zaf_i90_001.JPG'],
-                    [[28, 34], 'george', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/Back-to-the-Future-back-to-the-future-8227843-640-480.JPG'],
-                    [[35, 40], 'biff', 'http://files.onset.freedom.com/ocregister/Back_to_the_future/back-to-the-future-biff-marty-cafe.JPG']],
+                    [
+                        [8, 14],
+                        'marty',
+                        'http://cdn.seanstoops.com/bttf_quiz/marty.jpg',
+                        "I got Marty. Which 'Back to the Future' character are you?"],
+                    [
+                        [15, 21],
+                        'doc',
+                        'http://cdn.seanstoops.com/bttf_quiz/doc.jpg',
+                        "I got Doc. Which 'Back to the Future' character are you?"],
+                    [
+                        [22, 27],
+                        'lorraine',
+                        'http://cdn.seanstoops.com/bttf_quiz/lorraine.jpg',
+                        "I got Lorraine. Which 'Back to the Future' character are you?"],
+                    [
+                        [28, 34],
+                        'george',
+                        'http://cdn.seanstoops.com/bttf_quiz/george.jpg',
+                        "I got George. Which 'Back to the Future' character are you?"],
+                    [
+                        [35, 40],
+                        'biff',
+                        'http://cdn.seanstoops.com/bttf_quiz/biff.jpg',
+                        "I got Biff. Which 'Back to the Future' character are you?"]],
                     questions = [
                         {
                             q: "If you could build a time machine, what vehicle would you make it out of?",
@@ -175,7 +217,19 @@
                     qResults = $('#quiz-container .results'),
                     qIndex = 0,
                     qLength = questions.length,
-                    qSum = 0;
+                    qSum = 0,
+                    shareTitle,
+                    sharePhoto,
+                    twitterUrlTemplate = "https://twitter.com/intent/tweet?text={0}";
+
+                $('#quiz-sharing .fb').click(function(event) {
+                    event.preventDefault();
+                    FB.ui({
+                        method: 'feed',
+                        caption: shareTitle,
+                        picture: sharePhoto
+                    }, function(response){});
+                });
 
                 $.each(questions, function(index, val) {
                     var q = qTemplate.clone()
@@ -199,9 +253,13 @@
                                         };
                                     });
                                     qResults.find('img').attr('src', winner[2]);
+                                    shareTitle = winner[3];
+                                    sharePhoto = winner[2];
+                                    $('#quiz-sharing .twitter').attr(
+                                        'href',
+                                        twitterUrlTemplate.format(encodeURIComponent(shareTitle)));
                                 };
                                 $(this).parent().parent().parent().addClass('done');
-                                console.log(qSum)
                             })
                             .appendTo(a_list_dom);
                     });
